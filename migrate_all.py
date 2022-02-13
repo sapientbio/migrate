@@ -6,8 +6,8 @@
 
 import os
 
-os.system(f'python export_db.py --profile oldWS --workspace --set-export-dir old-workspace')
-os.system(f'python export_db.py --profile oldWS --download --set-export-dir old-workspace')
-os.system(f'cd old-workspace && python ../import_db.py --profile newWS --workspace')
+##os.system(f'python export_db.py --profile oldWS --workspace --set-export-dir old-workspace')
+##os.system(f'python export_db.py --profile oldWS --download --set-export-dir old-workspace')
+os.system(f'python import_db.py --profile newWS --workspace --set-export-dir ./old-workspace --archive-missing')
 
 

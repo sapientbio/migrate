@@ -283,21 +283,24 @@ class WorkspaceClient(dbclient):
         if resp.get('error', None):
             err_msg = {'error': resp.get('error'), 'path': notebook_path}
             logging_utils.log_reponse_error(error_logger, resp, err_msg)
-            return err_msg
+            # return err_msg
         nb_path = os.path.dirname(notebook_path)
         if nb_path != '/':
             # path is NOT empty, remove the trailing slash from export_dir
             save_path = export_dir[:-1] + nb_path + '/'
         else:
             save_path = export_dir
-        save_filename = save_path + os.path.basename(notebook_path) + '.' + resp.get('file_type')
-        # If the local path doesn't exist,we create it before we save the contents
-        if not os.path.exists(save_path) and save_path:
-            os.makedirs(save_path, exist_ok=True)
-        with open(save_filename, "wb") as f:
-            f.write(base64.b64decode(resp['content']))
-        checkpoint_notebook_set.write(notebook_path)
-        return {'path': notebook_path}
+        try :
+            save_filename = save_path + os.path.basename(notebook_path) + '.' + resp.get('file_type')
+            # If the local path doesn't exist,we create it before we save the contents
+            if not os.path.exists(save_path) and save_path:
+                os.makedirs(save_path, exist_ok=True)
+            with open(save_filename, "wb") as f:
+                f.write(base64.b64decode(resp['content']))
+            checkpoint_notebook_set.write(notebook_path)
+            return {'path': notebook_path}
+        except :
+            return {}
 
     def filter_workspace_items(self, item_list, item_type):
         """
@@ -562,6 +565,8 @@ class WorkspaceClient(dbclient):
         :param failed_log: failed import log
         :param archive_missing: whether to put missing users into a /Archive/ top level directory
         """
+        import pdb
+        pdb.set_trace()
         src_dir = self.get_export_dir() + artifact_dir
         error_logger = logging_utils.get_error_logger(wmconstants.WM_IMPORT, wmconstants.WORKSPACE_NOTEBOOK_OBJECT,
                                                       self.get_export_dir())
