@@ -565,8 +565,6 @@ class WorkspaceClient(dbclient):
         :param failed_log: failed import log
         :param archive_missing: whether to put missing users into a /Archive/ top level directory
         """
-        import pdb
-        pdb.set_trace()
         src_dir = self.get_export_dir() + artifact_dir
         error_logger = logging_utils.get_error_logger(wmconstants.WM_IMPORT, wmconstants.WORKSPACE_NOTEBOOK_OBJECT,
                                                       self.get_export_dir())
