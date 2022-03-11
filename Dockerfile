@@ -4,6 +4,8 @@ ADD . /migrate
 
 WORKDIR /migrate
 
+RUN apk add --no-cache bash
+
 RUN pip3 install --no-cache-dir . databricks-cli
 
 ENTRYPOINT ["/bin/sh"]
