@@ -541,7 +541,7 @@ class WorkspaceClient(dbclient):
             if not self.does_path_exist(upload_dir):
                 resp_mkdirs = self.post(WS_MKDIRS, {'path': upload_dir})
                 if 'error_code' in resp_mkdirs:
-                    error_logger.write(json.dumps(resp_mkdirs) + '\n')
+                    error_logger.error(json.dumps(resp_mkdirs))
             for f in files:
                 logging.info("Uploading: {0}".format(f))
                 # create the local file path to load the DBC file
@@ -552,10 +552,10 @@ class WorkspaceClient(dbclient):
                 nb_input_args = self.get_user_import_args(local_file_path, ws_file_path)
                 # call import to the workspace
                 if self.is_verbose():
-                    logging.info("Path: {0}".format(nb_input_args['path']))
+                    logging.info("Source: {0}, Target: {1}".format(local_file_path, nb_input_args['path']))
                 resp_upload = self.post(WS_IMPORT, nb_input_args)
                 if 'error_code' in resp_upload:
-                    error_logger.write(json.dumps(resp_upload) + '\n')
+                    error_logger.error(json.dumps(resp_upload))
 
     def import_all_workspace_items(self, artifact_dir='artifacts/',
                                    archive_missing=False):
@@ -625,10 +625,10 @@ class WorkspaceClient(dbclient):
                 nb_input_args = self.get_user_import_args(local_file_path, ws_file_path)
                 # call import to the workspace
                 if self.is_verbose():
-                    logging.info("Path: {0}".format(nb_input_args['path']))
+                    logging.info("Source: {0}, Target: {1}".format(local_file_path, nb_input_args['path']))
                 resp_upload = self.post(WS_IMPORT, nb_input_args)
                 if 'error_code' in resp_upload:
                     logging.info(f'Error uploading file: {ws_file_path}')
-                    error_logger.write(json.dumps(resp_upload) + '\n')
+                    error_logger.error(json.dumps(resp_upload))
                 else:
                     checkpoint_notebook_set.write(ws_file_path)

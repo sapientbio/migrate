@@ -153,10 +153,17 @@ class dbclient:
             full_endpoint = self._url + '/api/{0}'.format(ver) + endpoint
             if self.is_verbose():
                 print("Get: {0}".format(full_endpoint))
-            if json_params:
-                raw_results = requests.get(full_endpoint, headers=self._token, params=json_params, verify=self._verify_ssl)
-            else:
-                raw_results = requests.get(full_endpoint, headers=self._token, verify=self._verify_ssl)
+            try:
+                if json_params:
+                    raw_results = requests.get(full_endpoint, headers=self._token, params=json_params, verify=self._verify_ssl, timeout=30)
+                else:
+                    raw_results = requests.get(full_endpoint, headers=self._token, verify=self._verify_ssl, timeout=30)
+            except requests.exceptions.ConnectionError as e:
+                logging.warning(f"Connection error: {e}")
+                continue
+            except requests.exceptions.Timeout as e:
+                logging.warning(f"Timeout error: {e}")
+                continue
 
             if self._should_retry_with_new_token(raw_results):
                 continue
@@ -182,19 +189,30 @@ class dbclient:
             if self.is_verbose():
                 print("{0}: {1}".format(http_type, full_endpoint))
             if json_params:
-                if http_type == 'post':
-                    if files_json:
-                        raw_results = requests.post(full_endpoint, headers=self._token,
-                                                    data=json_params, files=files_json, verify=self._verify_ssl)
-                    else:
-                        raw_results = requests.post(full_endpoint, headers=self._token,
-                                                    json=json_params, verify=self._verify_ssl)
-                if http_type == 'put':
-                    raw_results = requests.put(full_endpoint, headers=self._token,
-                                               json=json_params, verify=self._verify_ssl)
-                if http_type == 'patch':
-                    raw_results = requests.patch(full_endpoint, headers=self._token,
-                                                 json=json_params, verify=self._verify_ssl)
+                try:
+                    if http_type == 'post':
+                        if files_json:
+                            raw_results = requests.post(full_endpoint, headers=self._token,
+                                                        data=json_params, files=files_json,
+                                                        verify=self._verify_ssl, timeout=30)
+                        else:
+                            raw_results = requests.post(full_endpoint, headers=self._token,
+                                                        json=json_params, verify=self._verify_ssl,
+                                                        timeout=30)
+                    if http_type == 'put':
+                        raw_results = requests.put(full_endpoint, headers=self._token,
+                                                   json=json_params, verify=self._verify_ssl,
+                                                   timeout=30)
+                    if http_type == 'patch':
+                        raw_results = requests.patch(full_endpoint, headers=self._token,
+                                                     json=json_params, verify=self._verify_ssl,
+                                                     timeout=30)
+                except requests.exceptions.ConnectionError as e:
+                    logging.warning(f"Connection error: {e}")
+                    continue
+                except requests.exceptions.Timeout as e:
+                    logging.warning(f"Timeout error: {e}")
+                    continue
             else:
                 print("Must have a payload in json_args param.")
                 return {}
