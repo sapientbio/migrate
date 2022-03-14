@@ -33,7 +33,7 @@ def main():
     if args.users:
         print("Import all users and groups at {0}".format(now))
         scim_c = ScimClient(client_config)
-        if client_config['is_aws']:
+        if client_config['is_aws'] and not client_config['skip_aws_instance_profiles']:
             print("Start import of instance profiles first to ensure they exist...")
             cl_c = ClustersClient(client_config)
             start = timer()

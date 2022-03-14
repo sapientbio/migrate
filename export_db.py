@@ -50,7 +50,7 @@ def main():
         end = timer()
         print("Complete Group Export Time: " + str(timedelta(seconds=end - start)))
         # log the instance profiles
-        if scim_c.is_aws():
+        if scim_c.is_aws() and not args.skip_aws_instance_profiles:
             cl_c = ClustersClient(client_config)
             print("Start instance profile logging ...")
             start = timer()
