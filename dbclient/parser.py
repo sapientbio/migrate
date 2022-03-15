@@ -215,6 +215,10 @@ def get_export_parser():
 
     parser.add_argument('--use-checkpoint', action='store_true',
                         help='use checkpointing to restart from previous state')
+
+    parser.add_argument('--skip-aws-instance-profiles', action='store_true',
+                        help='do not export instance_profiles')
+
     return parser
 
 
@@ -333,6 +337,10 @@ def get_import_parser():
 
     parser.add_argument('--use-checkpoint', action='store_true',
                         help='use checkpointing to restart from previous state')
+
+    parser.add_argument('--skip-aws-instance-profiles', action='store_true',
+                        help='do not import instance_profiles')
+
     return parser
 
 
@@ -366,7 +374,8 @@ def build_client_config(profile, url, token, args):
               'verify_ssl': (not args.no_ssl_verification),
               'skip_failed': args.skip_failed,
               'debug': args.debug,
-              'file_format': str(args.notebook_format)
+              'file_format': str(args.notebook_format),
+              'skip_aws_instance_profiles': args.skip_aws_instance_profiles
               }
     # this option only exists during imports so we check for existence
     if 'overwrite_notebooks' in args:

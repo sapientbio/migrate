@@ -283,21 +283,24 @@ class WorkspaceClient(dbclient):
         if resp.get('error', None):
             err_msg = {'error': resp.get('error'), 'path': notebook_path}
             logging_utils.log_reponse_error(error_logger, resp, err_msg)
-            return err_msg
+            # return err_msg
         nb_path = os.path.dirname(notebook_path)
         if nb_path != '/':
             # path is NOT empty, remove the trailing slash from export_dir
             save_path = export_dir[:-1] + nb_path + '/'
         else:
             save_path = export_dir
-        save_filename = save_path + os.path.basename(notebook_path) + '.' + resp.get('file_type')
-        # If the local path doesn't exist,we create it before we save the contents
-        if not os.path.exists(save_path) and save_path:
-            os.makedirs(save_path, exist_ok=True)
-        with open(save_filename, "wb") as f:
-            f.write(base64.b64decode(resp['content']))
-        checkpoint_notebook_set.write(notebook_path)
-        return {'path': notebook_path}
+        try :
+            save_filename = save_path + os.path.basename(notebook_path) + '.' + resp.get('file_type')
+            # If the local path doesn't exist,we create it before we save the contents
+            if not os.path.exists(save_path) and save_path:
+                os.makedirs(save_path, exist_ok=True)
+            with open(save_filename, "wb") as f:
+                f.write(base64.b64decode(resp['content']))
+            checkpoint_notebook_set.write(notebook_path)
+            return {'path': notebook_path}
+        except :
+            return {}
 
     def filter_workspace_items(self, item_list, item_type):
         """
@@ -538,7 +541,7 @@ class WorkspaceClient(dbclient):
             if not self.does_path_exist(upload_dir):
                 resp_mkdirs = self.post(WS_MKDIRS, {'path': upload_dir})
                 if 'error_code' in resp_mkdirs:
-                    error_logger.write(json.dumps(resp_mkdirs) + '\n')
+                    error_logger.error(json.dumps(resp_mkdirs))
             for f in files:
                 logging.info("Uploading: {0}".format(f))
                 # create the local file path to load the DBC file
@@ -549,10 +552,10 @@ class WorkspaceClient(dbclient):
                 nb_input_args = self.get_user_import_args(local_file_path, ws_file_path)
                 # call import to the workspace
                 if self.is_verbose():
-                    logging.info("Path: {0}".format(nb_input_args['path']))
+                    logging.info("Source: {0}, Target: {1}".format(local_file_path, nb_input_args['path']))
                 resp_upload = self.post(WS_IMPORT, nb_input_args)
                 if 'error_code' in resp_upload:
-                    error_logger.write(json.dumps(resp_upload) + '\n')
+                    error_logger.error(json.dumps(resp_upload))
 
     def import_all_workspace_items(self, artifact_dir='artifacts/',
                                    archive_missing=False):
@@ -622,10 +625,10 @@ class WorkspaceClient(dbclient):
                 nb_input_args = self.get_user_import_args(local_file_path, ws_file_path)
                 # call import to the workspace
                 if self.is_verbose():
-                    logging.info("Path: {0}".format(nb_input_args['path']))
+                    logging.info("Source: {0}, Target: {1}".format(local_file_path, nb_input_args['path']))
                 resp_upload = self.post(WS_IMPORT, nb_input_args)
                 if 'error_code' in resp_upload:
                     logging.info(f'Error uploading file: {ws_file_path}')
-                    error_logger.write(json.dumps(resp_upload) + '\n')
+                    error_logger.error(json.dumps(resp_upload))
                 else:
                     checkpoint_notebook_set.write(ws_file_path)

@@ -1,0 +1,18 @@
+name: Build snapshot
+
+on:
+  pull_request:
+jobs:
+  build:
+    name: Build Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Build
+        env:
+          ECR_REGISTRY: local
+          ECR_REPOSITORY: databricks-migrate
+          IMAGE_TAG: snapshot
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
