@@ -3,18 +3,30 @@ name: Deploy to ECR
 on:
   push:
     branches: [ master ]
+
+env:
+  AWS_ACCOUNT_ID: "983638233270"
+
 jobs:
   build:
     name: Build Image
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: write  # This is required for actions/checkout
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          short-length: 8
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        id: aws-credentials
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ecr-writer
+          role-session-name: ${{ env.GITHUB_REPOSITORY_NAME_PART }}
           aws-region: us-west-2
       - name: Login to Amazon ECR
         id: login-ecr
